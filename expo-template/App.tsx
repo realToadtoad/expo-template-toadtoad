@@ -14,6 +14,7 @@ import { default as darkTheme } from "./dark-mapping.json";
 import { default as customMapping } from "./custom-mapping.json";
 import { ApplicationProvider, IconRegistry } from "@ui-kitten/components";
 import * as Font from "expo-font";
+import { AppLoading } from "expo";
 
 import { MainScreen } from "./app/screens/main_screen/main_screen";
 
@@ -26,6 +27,8 @@ function wait(timeout: number) {
 }
 
 export default class App extends React.Component {
+  fontsLoaded = false;
+
   async loadFonts() {
     await Font.loadAsync({
       "Metropolis-Regular": require("./assets/fonts/metropolis/Metropolis-Regular.ttf")
@@ -51,6 +54,7 @@ export default class App extends React.Component {
     await Font.loadAsync({
       Inter: require("./assets/fonts/Inter.otf")
     });
+    this.fontsLoaded = true;
   }
 
   async initializeApp() {
@@ -58,25 +62,29 @@ export default class App extends React.Component {
   }
 
   async componentDidMount() {
-    await this.loadFonts();
+    await this.initializeApp();
     await wait(1000);
     this.forceUpdate();
   }
 
-render() {
-  return (
-    <React.Fragment>
-      <IconRegistry icons={EvaIconsPack} />
-      <ApplicationProvider
-        mapping={mapping}
-        theme={theme}
-        customMapping={customMapping}
-      >
-        <AppNavigator />
-      </ApplicationProvider>
-    </React.Fragment>
-  );
-}
+  render() {
+    if (!this.fontsLoaded) {
+      return <AppLoading />;
+    } else {
+      return (
+        <React.Fragment>
+          <IconRegistry icons={EvaIconsPack} />
+          <ApplicationProvider
+            mapping={mapping}
+            theme={theme}
+            customMapping={customMapping}
+          >
+            <AppNavigator />
+          </ApplicationProvider>
+        </React.Fragment>
+      );
+    }
+  }
 }
 
 export const StackNavigator = createStackNavigator({
